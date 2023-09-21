@@ -18,7 +18,8 @@ int init()
 	signal(SIGKILL, killterm_handler);
 	signal(SIGTERM, killterm_handler);
 
-	gi.window = (Rect){.x = 0.0f, .y = 0.0f, .w = 2*512.0f, .h = 2*512.0f};
+	float scale = 1.5f;
+	gi.window = (Rect){.x = 0.0f, .y = 0.0f, .w = scale*512.0f, .h = scale*512.0f};
 
 	// satisfying rel.[xy]*2 == .[wh] centers axis in parent container
 	gi.rgb_square.rel = (Rect){.x = 0.05, .y = 0.05, .w = 0.5, .h = 0.5};

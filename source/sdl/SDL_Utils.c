@@ -5,7 +5,6 @@
 #include "../Math_Utils.h"
 
 #define unroll_sdl_color(color) color.r, color.g, color.b, color.a
-#define lineColorFPoints(r, a, b, c) lineColor(r, a.x - camera_offset.x, a.y - camera_offset.y, b.x - camera_offset.x, b.y - camera_offset.y, c)
 
 SDL_Color red = {255, 0, 0, 255};
 SDL_Color green = {0, 255, 0, 255};
@@ -20,9 +19,6 @@ const int keypress_delta = 4;
 int32_t init_renderer(Game_Info* gi)
 {
 	mgr.pad = NULL;
-
-	// default game states
-	// start overriding these with configs
 
 	//load_config(argv[1], gs);
 
@@ -64,18 +60,53 @@ int32_t delay(int32_t delay_time)
 	return 0;
 }
 
-int32_t render_rgb_square(Game_Info* gi)
+// Rename this eventually
+// It's actually HSL
+int32_t render_rgb_square(Game_Info* gi, SDL_FRect* container)
 {
-	SDL_SetRenderDrawColor(mgr.rend, 0x00, 0x00, 0x00, 0xFF);
-	gi->rgb_square.real = fr_margin_adjust(gi->window, gi->rgb_square.rel);
-	SDL_RenderFillRectF(mgr.rend, &gi->rgb_square.real);
+	HSL_Color active_hsl = gi->active_hsl;
+	SDL_Color hsl_pixel;
+	SDL_Point draw_point;
+	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(gi->active_rgb));
+	SDL_RenderFillRectF(mgr.rend, container);
+
+	// I guess not much other way than good ol' n^2
+	// hmmm we'll fix this later
+
+	active_hsl.s = 0;
+	active_hsl.l = 0;
+	for (int r = 0; r < container->w; r++)
+	{
+		active_hsl.s = ((float)r/(float)container->w) * 100;
+		for (int c = 0; c < container->h; c++)
+		{
+			active_hsl.l = ((float)1.0-c/(float)container->h) * 100;
+
+			hsl_pixel = hsl_to_rgb(active_hsl);
+			SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(hsl_pixel));
+			SDL_RenderDrawPoint(mgr.rend, r+container->x, c+container->y);
+		}
+	}
+
+	float s_norm = (float)gi->active_hsl.s/100.0f;
+	float l_norm = (float)gi->active_hsl.l/100.0f;
+	SDL_Rect cursor = {
+		.x = ((s_norm) * container->w) + container->x,
+		.y = ((1.0f - l_norm) * container->h) + container->y,
+		.w = 10,
+		.h = 10
+	};
+	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
+	SDL_RenderDrawLine(mgr.rend, container->x-16, cursor.y, container->x+container->w+16, cursor.y);
+	SDL_RenderDrawLine(mgr.rend, cursor.x, container->y-16, cursor.x, container->y+container->h+16);
 
 	return 0;
 }
 
-int32_t render_solid_color(Game_Info* gi, SDL_FRect* container, SDL_Color color)
+int32_t render_color_preview(Game_Info* gi, SDL_FRect* container)
 {
-	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(color));
+	gi->active_rgb = hsl_to_rgb(gi->active_hsl);
+	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(gi->active_rgb));
 	SDL_RenderFillRectF(mgr.rend, container);
 
 	return 0;
@@ -123,6 +154,7 @@ int32_t display(Game_Info* gi)
 
 	// this would be really cool to turn into some stack-based type of thing
 	// Also, if resizing is disabled, this can be moved to a static initialization section
+	// orrrr, maybe we can finally do callbacks
 	render_container(gi, &gi->window, &gi->rgb_square, green);
 	render_container(gi, &gi->window, &gi->hue_slider, green);
 	render_container(gi, &gi->window, &gi->info_container, blue);
@@ -137,10 +169,10 @@ int32_t display(Game_Info* gi)
 			render_container(gi, &gi->hsl_info.real, &gi->saturation, blue);
 			render_container(gi, &gi->hsl_info.real, &gi->luminence, red);
 
-	render_solid_color(gi, &gi->final_sample.real, gi->active_rgb);
+	render_color_preview(gi, &gi->final_sample.real);
 	render_vertical_hue_spectrum(gi, &gi->hue_slider.real);
+	render_rgb_square(gi, &gi->rgb_square.real);
 
-	// This is kinda the important stuff
 	SDL_RenderPresent(mgr.rend);
 	return 0;
 }
@@ -156,15 +188,31 @@ int32_t check_inputs(Game_Info* gi)
 				case SDLK_q:
 					gi->game_alive = 0;
 					break;
-				case SDLK_j:
+				case SDLK_b:
 					gi->active_hsl.h += 1;
 					if(gi->active_hsl.h > 360)
 						gi->active_hsl.h -= 360;
 					break;
-				case SDLK_k:
+				case SDLK_n:
 					gi->active_hsl.h -= 1;
 					if(gi->active_hsl.h < 0)
 						gi->active_hsl.h += 360;
+					break;
+				case SDLK_k:
+					if(gi->active_hsl.l < 100)
+						gi->active_hsl.l += 1;
+					break;
+				case SDLK_j:
+					if(gi->active_hsl.l > 0)
+						gi->active_hsl.l -= 1;
+					break;
+				case SDLK_l:
+					if(gi->active_hsl.s < 100)
+						gi->active_hsl.s += 1;
+					break;
+				case SDLK_h:
+					if(gi->active_hsl.s > 0)
+						gi->active_hsl.s -= 1;
 					break;
 			}
 		}

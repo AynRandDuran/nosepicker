@@ -33,8 +33,8 @@ typedef struct
 	// Internet says hue likes to go 0-360
 	// Saturation and luminence are 0-100
 	int16_t h;
-	uint8_t s;
-	uint8_t l;
+	int8_t s;
+	int8_t l;
 	uint8_t a;
 
 } HSL_Color;
