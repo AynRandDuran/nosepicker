@@ -1,4 +1,5 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_ttf.h>
 #include <sys/param.h>
 
 #include "SDL_Utils.h"
@@ -112,6 +113,61 @@ int32_t render_color_preview(Game_Info* gi, SDL_FRect* container)
 	return 0;
 }
 
+// https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
+// This is horrible and textures should really be cached in some way
+int32_t render_info_boxes(Game_Info* gi, SDL_FRect* container)
+{
+	char red_string[32];
+	char blu_string[32];
+	char grn_string[32];
+	char hue_string[32];
+	char sat_string[32];
+	char lum_string[32];
+
+	sprintf(red_string, "R:%d/%X", gi->active_rgb.r, gi->active_rgb.r);
+	sprintf(grn_string, "G:%d/%X", gi->active_rgb.g, gi->active_rgb.g);
+	sprintf(blu_string, "B:%d/%X", gi->active_rgb.b, gi->active_rgb.b);
+	sprintf(hue_string, "H:%d/%X", gi->active_hsl.h, gi->active_hsl.h);
+	sprintf(sat_string, "S:%d/%X", gi->active_hsl.s, gi->active_hsl.s);
+	sprintf(lum_string, "L:%d/%X", gi->active_hsl.l, gi->active_hsl.l);
+
+	gi->red_component_text_surface		= TTF_RenderText_Solid(gi->font, red_string, black);
+	gi->green_component_text_surface	= TTF_RenderText_Solid(gi->font, grn_string, black);
+	gi->blue_component_text_surface		= TTF_RenderText_Solid(gi->font, blu_string, black);
+	gi->hue_component_text_surface		= TTF_RenderText_Solid(gi->font, hue_string, black);
+	gi->sat_component_text_surface		= TTF_RenderText_Solid(gi->font, sat_string, black);
+	gi->lum_component_text_surface		= TTF_RenderText_Solid(gi->font, lum_string, black);
+
+	gi->red_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, gi->red_component_text_surface);
+	gi->green_component_text_tex			= SDL_CreateTextureFromSurface(mgr.rend, gi->green_component_text_surface);
+	gi->blue_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, gi->blue_component_text_surface);
+	gi->hue_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, gi->hue_component_text_surface);
+	gi->sat_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, gi->sat_component_text_surface);
+	gi->lum_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, gi->lum_component_text_surface);
+
+	// Now we can render
+	SDL_RenderCopyF(mgr.rend, gi->red_component_text_tex,		NULL, &gi->red.real);
+	SDL_RenderCopyF(mgr.rend, gi->green_component_text_tex,	NULL, &gi->green.real);
+	SDL_RenderCopyF(mgr.rend, gi->blue_component_text_tex,		NULL, &gi->blue.real);
+	SDL_RenderCopyF(mgr.rend, gi->hue_component_text_tex,		NULL, &gi->hue.real);
+	SDL_RenderCopyF(mgr.rend, gi->sat_component_text_tex,		NULL, &gi->saturation.real);
+	SDL_RenderCopyF(mgr.rend, gi->lum_component_text_tex,		NULL, &gi->luminence.real);
+
+	// Cleanup
+	SDL_FreeSurface(gi->red_component_text_surface);
+	SDL_FreeSurface(gi->green_component_text_surface);
+	SDL_FreeSurface(gi->blue_component_text_surface);
+	SDL_FreeSurface(gi->hue_component_text_surface);
+	SDL_FreeSurface(gi->sat_component_text_surface);
+	SDL_FreeSurface(gi->lum_component_text_surface);
+	SDL_DestroyTexture(gi->red_component_text_tex);
+	SDL_DestroyTexture(gi->green_component_text_tex);
+	SDL_DestroyTexture(gi->blue_component_text_tex);
+	SDL_DestroyTexture(gi->hue_component_text_tex);
+	SDL_DestroyTexture(gi->sat_component_text_tex);
+	SDL_DestroyTexture(gi->lum_component_text_tex);
+}
+
 int32_t render_vertical_hue_spectrum(Game_Info* gi, SDL_FRect* container)
 {
 
@@ -140,7 +196,7 @@ int32_t render_container(Game_Info* gi, SDL_FRect* parent, Layout_Rect* child, S
 {
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(color));
 	child->real = fr_margin_adjust(*parent, child->rel);
-	SDL_RenderFillRectF(mgr.rend, &child->real);
+	//SDL_RenderFillRectF(mgr.rend, &child->real);
 
 	return 0;
 }
@@ -172,6 +228,7 @@ int32_t display(Game_Info* gi)
 	render_color_preview(gi, &gi->final_sample.real);
 	render_vertical_hue_spectrum(gi, &gi->hue_slider.real);
 	render_rgb_square(gi, &gi->rgb_square.real);
+	render_info_boxes(gi, &gi->info_boxes.real);
 
 	SDL_RenderPresent(mgr.rend);
 	return 0;

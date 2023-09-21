@@ -3,6 +3,7 @@
 
 #if BUILD_SDL
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #define Point SDL_Point
 #define FPoint SDL_FPoint
 #define Rect SDL_FRect
@@ -57,19 +58,31 @@ typedef struct
 			Layout_Rect info_boxes;
 				Layout_Rect rgb_info;
 					Layout_Rect red;
-					Layout_Rect blue;
+					SDL_Surface* red_component_text_surface;
+					SDL_Texture* red_component_text_tex;
 					Layout_Rect green;
+					SDL_Surface* green_component_text_surface;
+					SDL_Texture* green_component_text_tex;
+					Layout_Rect blue;
+					SDL_Surface* blue_component_text_surface;
+					SDL_Texture* blue_component_text_tex;
 				Layout_Rect hsl_info;
 					Layout_Rect hue;
+					SDL_Surface* hue_component_text_surface;
+					SDL_Texture* hue_component_text_tex;
 					Layout_Rect saturation;
+					SDL_Surface* sat_component_text_surface;
+					SDL_Texture* sat_component_text_tex;
 					Layout_Rect luminence;
+					SDL_Surface* lum_component_text_surface;
+					SDL_Texture* lum_component_text_tex;
 
 	Color active_rgb;
-
-	// Hue value should correspond to value on HSV slider
 	HSL_Color active_hsl;
 
 	int game_alive;
+
+	TTF_Font* font;
 
 } Game_Info;
 

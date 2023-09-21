@@ -8,6 +8,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <signal.h>
+#include <assert.h>
 
 Game_Info gi;
 void killterm_handler(int signum);
@@ -18,7 +19,7 @@ int init()
 	signal(SIGKILL, killterm_handler);
 	signal(SIGTERM, killterm_handler);
 
-	float scale = 1.5f;
+	float scale = 1.0f;
 	gi.window = (Rect){.x = 0.0f, .y = 0.0f, .w = scale*512.0f, .h = scale*512.0f};
 
 	// satisfying rel.[xy]*2 == .[wh] centers axis in parent container
@@ -38,6 +39,10 @@ int init()
 
 	gi.active_hsl = (HSL_Color){.h = 0, .s = 100, .l = 50};
 	gi.active_rgb = hsl_to_rgb(gi.active_hsl);
+
+	TTF_Init();
+	gi.font = TTF_OpenFont("/usr/share/fonts/TTF/iosevka-fixed-regular.ttf", 24);
+	assert(gi.font != NULL);
 
 	init_renderer(&gi);
 
