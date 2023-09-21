@@ -1,9 +1,9 @@
 let prj_base = expand('%:p:h')
-let build = prj_base . '/bin/sdl'
+let build = prj_base . '/bin/picker'
 let run_build  = "!" . build . " -nop"
 
-nmap \m :wa \| :make! sdl \| execute run_build<CR>
-nmap \d :wa \| :make! d_sdl
+nmap \m :wa \| :make! picker \| execute run_build<CR>
+nmap \d :wa \| :make! picker_debug
 
 " https://stackoverflow.com/questions/37552913/vim-how-to-keep-folds-on-save
 " Save folds between vim sessions
