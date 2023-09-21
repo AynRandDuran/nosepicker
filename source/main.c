@@ -18,33 +18,25 @@ int init()
 	signal(SIGKILL, killterm_handler);
 	signal(SIGTERM, killterm_handler);
 
-	gi.window = (Rect){.x = 0.0f, .y = 0.0f, .w = 512.0f, .h = 512.0f};
+	gi.window = (Rect){.x = 0.0f, .y = 0.0f, .w = 2*512.0f, .h = 2*512.0f};
+
 	// satisfying rel.[xy]*2 == .[wh] centers axis in parent container
 	gi.rgb_square.rel = (Rect){.x = 0.05, .y = 0.05, .w = 0.5, .h = 0.5};
 	gi.hue_slider.rel = (Rect){.x = 0.65, .y = 0.05, .w = .08, .h = 0.5};
 	gi.final_sample.rel = (Rect){.x = 0.05, .y = .65, .w = 0.20, .h = 0.20};
-
 	gi.info_container.rel = (Rect){.x = 0.05, .y = .65, .w = .9, .h = .30};
 	gi.info_boxes.rel = (Rect){.x = .25, .y = 0.00, .w = 0.75, .h = 1.00};
-
 	gi.rgb_info.rel = (Rect){.x = 0.00, .y = 0.00, .w = 1.00, .h = 0.50};
 	gi.red.rel = (Rect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
 	gi.green.rel = (Rect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
 	gi.blue.rel = (Rect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
-
 	gi.hsl_info.rel = (Rect){.x = 0.00, .y = 0.50, .w = 1.00, .h = 0.50};
 	gi.hue.rel = (Rect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
 	gi.saturation.rel = (Rect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
 	gi.luminence.rel = (Rect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
 
-	// lime (120 100 50) - > (0 255 0)
-	gi.active_hsv = (HSL_Color){.h = 120, .s = 100, .l = 50};
-
-	// silver (0 0 75) - > (0 255 0)
-	gi.active_hsv = (HSL_Color){.h = 0, .s = 0, .l = 75};
-
-	Color rgb = hsl_to_rgb(gi.active_hsv);
-	printf("%d %d %d\n", rgb.r, rgb.g, rgb.b);
+	gi.active_hsl = (HSL_Color){.h = 0, .s = 100, .l = 50};
+	gi.active_rgb = hsl_to_rgb(gi.active_hsl);
 
 	init_renderer(&gi);
 
@@ -52,16 +44,6 @@ int init()
 
 	return 0;
 };
-
-int handle_collisions(Game_Info* gi)
-{
-}
-
-int game_loop(Game_Info* gi, float time_step)
-{
-
-	return 0;
-}
 
 int main(void)
 {
@@ -80,7 +62,6 @@ int main(void)
 		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
 
 		check_inputs(&gi);
-		game_loop(&gi, time_step);
 		display(&gi);
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &ts_end);

@@ -32,7 +32,7 @@ typedef struct
 {
 	// Internet says hue likes to go 0-360
 	// Saturation and luminence are 0-100
-	uint16_t h;
+	int16_t h;
 	uint8_t s;
 	uint8_t l;
 	uint8_t a;
@@ -67,7 +67,7 @@ typedef struct
 	Color active_rgb;
 
 	// Hue value should correspond to value on HSV slider
-	HSL_Color active_hsv;
+	HSL_Color active_hsl;
 
 	int game_alive;
 
