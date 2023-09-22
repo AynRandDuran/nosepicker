@@ -1,7 +1,6 @@
 #ifndef STRUCTS__
 #define STRUCTS__
 
-#if BUILD_SDL
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #define Point SDL_Point
@@ -9,7 +8,6 @@
 #define Rect SDL_FRect
 #define Relative_Rect SDL_FRect
 #define Color SDL_Color
-#endif // BUILD_SDL
 
 #include <stdint.h>
 
@@ -77,14 +75,19 @@ typedef struct
 					SDL_Surface* lum_component_text_surface;
 					SDL_Texture* lum_component_text_tex;
 
+} Window_Layout;
+
+typedef struct
+{
 	Color active_rgb;
 	HSL_Color active_hsl;
+	Window_Layout layout;
 
-	int game_alive;
+	int keep_alive;
 
 	TTF_Font* font;
 
-} Game_Info;
+} runtime_info;
 
 #endif // STRUCTS__
 
