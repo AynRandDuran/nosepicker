@@ -17,22 +17,22 @@ int init()
 	signal(SIGTERM, killterm_handler);
 
 	float scale = 1.0f;
-	runtime.layout.window = (Rect){.x = 0.0f, .y = 0.0f, .w = scale*512.0f, .h = scale*512.0f};
+	runtime.layout.window = (SDL_FRect){.x = 0.0f, .y = 0.0f, .w = scale*512.0f, .h = scale*512.0f};
 
 	// satisfying rel.[xy]*2 == .[wh] centers axis in parent container
-	runtime.layout.rgb_square.rel = (Rect){.x = 0.05, .y = 0.05, .w = 0.5, .h = 0.5};
-	runtime.layout.hue_slider.rel = (Rect){.x = 0.70, .y = 0.05, .w = .08, .h = 0.5};
-	runtime.layout.final_sample.rel = (Rect){.x = 0.05, .y = .65, .w = 0.20, .h = 0.20};
-	runtime.layout.info_container.rel = (Rect){.x = 0.05, .y = .65, .w = .9, .h = .30};
-	runtime.layout.info_boxes.rel = (Rect){.x = .25, .y = 0.00, .w = 0.75, .h = 1.00};
-	runtime.layout.rgb_info.rel = (Rect){.x = 0.00, .y = 0.00, .w = 1.00, .h = 0.50};
-	runtime.layout.red.rel = (Rect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
-	runtime.layout.green.rel = (Rect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
-	runtime.layout.blue.rel = (Rect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
-	runtime.layout.hsl_info.rel = (Rect){.x = 0.00, .y = 0.50, .w = 1.00, .h = 0.50};
-	runtime.layout.hue.rel = (Rect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
-	runtime.layout.saturation.rel = (Rect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
-	runtime.layout.luminence.rel = (Rect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.rgb_square.rel = (SDL_FRect){.x = 0.05, .y = 0.05, .w = 0.5, .h = 0.5};
+	runtime.layout.hue_slider.rel = (SDL_FRect){.x = 0.70, .y = 0.05, .w = .08, .h = 0.5};
+	runtime.layout.final_sample.rel = (SDL_FRect){.x = 0.05, .y = .65, .w = 0.20, .h = 0.20};
+	runtime.layout.info_container.rel = (SDL_FRect){.x = 0.05, .y = .65, .w = .9, .h = .30};
+	runtime.layout.info_boxes.rel = (SDL_FRect){.x = .25, .y = 0.00, .w = 0.75, .h = 1.00};
+	runtime.layout.rgb_info.rel = (SDL_FRect){.x = 0.00, .y = 0.00, .w = 1.00, .h = 0.50};
+	runtime.layout.red.rel = (SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.green.rel = (SDL_FRect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.blue.rel = (SDL_FRect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.hsl_info.rel = (SDL_FRect){.x = 0.00, .y = 0.50, .w = 1.00, .h = 0.50};
+	runtime.layout.hue.rel = (SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.saturation.rel = (SDL_FRect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00};
+	runtime.layout.luminence.rel = (SDL_FRect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00};
 
 	runtime.active_hsl = (HSL_Color){.h = 0, .s = 100, .l = 50};
 	runtime.active_rgb = hsl_to_rgb(runtime.active_hsl);

@@ -3,11 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#define Point SDL_Point
-#define FPoint SDL_FPoint
-#define Rect SDL_FRect
 #define Relative_Rect SDL_FRect
-#define Color SDL_Color
 
 #include <stdint.h>
 
@@ -16,7 +12,7 @@
 typedef struct
 {
 	Relative_Rect rel;
-	Rect real;
+	SDL_FRect real;
 
 	// bool
 	// center in parent axis (even spacing on both sides?)
@@ -40,7 +36,7 @@ typedef struct
 
 typedef struct
 {
-	FPoint position;
+	SDL_FPoint position;
 	uint32_t radius;
 
 } Circle;
@@ -48,7 +44,7 @@ typedef struct
 typedef struct
 {
 	// Tabbing these to visually indicate layout
-	Rect window;
+	SDL_FRect window;
 		Layout_Rect rgb_square; // big clicky draggy square
 		Layout_Rect hue_slider; // HSV slider bar
 		Layout_Rect info_container;
@@ -79,7 +75,7 @@ typedef struct
 
 typedef struct
 {
-	Color active_rgb;
+	SDL_Color active_rgb;
 	HSL_Color active_hsl;
 	Window_Layout layout;
 

@@ -21,7 +21,7 @@ int32_t render_container(runtime_info* runtime, SDL_FRect* parent, Layout_Rect* 
 SDL_FRect fr_add(const SDL_FRect left, const SDL_FRect right);
 SDL_FRect fr_subtract(const SDL_FRect left, const SDL_FRect right);
 SDL_FRect fr_mult(const SDL_FRect left, const SDL_FRect right);
-SDL_FRect fr_marruntimen_adjust(const SDL_FRect parent, const Relative_Rect child);
+SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child);
 SDL_Color hsl_to_rgb (const HSL_Color hsl);
 SDL_Color wikipedia_hsl_to_rgb (const HSL_Color hsl);
 #endif // SDL_Utils__

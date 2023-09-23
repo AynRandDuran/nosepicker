@@ -13,14 +13,11 @@ SDL_Color white = {255, 255, 255, 255};
 SDL_Color magenta = {255, 0, 255, 255};
 
 sdl_group mgr;
-const int keypress_delta = 4;
 
 int32_t init_renderer(runtime_info* runtime)
 {
-	//load_config(argv[1], gs);
-
 	SDL_SetMainReady();
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER))
+	if (SDL_Init(SDL_INIT_VIDEO))
 	{
 		fprintf(stderr, "SDL initialization failed\n");
 		exit(__LINE__);
@@ -208,7 +205,7 @@ int32_t render_vertical_hue_spectrum(runtime_info* runtime, SDL_FRect* container
 int32_t render_container(runtime_info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(color));
-	child->real = fr_marruntimen_adjust(*parent, child->rel);
+	child->real = fr_margin_adjust(*parent, child->rel);
 
 	return 0;
 }
@@ -307,7 +304,7 @@ SDL_FRect fr_mult(const SDL_FRect left, const SDL_FRect right)
 }
 
 // Math out placement for a relative rect onto a concrete parent
-SDL_FRect fr_marruntimen_adjust(const SDL_FRect parent, const Relative_Rect child)
+SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child)
 {
 	return
 	(SDL_FRect){

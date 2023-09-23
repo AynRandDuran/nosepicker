@@ -1,5 +1,5 @@
 let prj_base = expand('%:p:h')
-let build = prj_base . '/bin/picker'
+let build = './bin/picker'
 let run_build  = "!" . build . " -nop"
 
 nmap \m :wa \| :make! picker \| execute run_build<CR>
@@ -24,5 +24,4 @@ function! s:ide()
 endfunction
 
 let $src=prj_base.'/source'
-let $sdl=$src.'/source/sdl'
 let $bin=prj_base.'/bin'
