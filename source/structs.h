@@ -4,7 +4,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #define Relative_Rect SDL_FRect
-
 #include <stdint.h>
 
 // A placeable rect, with relative components to its parent,
@@ -45,7 +44,7 @@ typedef struct
 {
 	// Tabbing these to visually indicate layout
 	SDL_FRect window;
-		Layout_Rect rgb_square; // big clicky draggy square
+		Layout_Rect hsl_square; // big clicky draggy square
 		Layout_Rect hue_slider; // HSV slider bar
 		Layout_Rect info_container;
 			Layout_Rect final_sample; // small square showing full selected color
@@ -83,7 +82,7 @@ typedef struct
 
 	TTF_Font* font;
 
-} runtime_info;
+} Runtime_Info;
 
 #endif // STRUCTS__
 

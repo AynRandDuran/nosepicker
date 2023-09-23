@@ -10,13 +10,13 @@ typedef struct sdl_group
 }
 sdl_group;
 
-int32_t init_renderer(runtime_info* runtime);
+int32_t init_renderer(Runtime_Info* runtime);
 int32_t shutdown_renderer();
 int32_t delay(int32_t delay_time);
-int32_t display(runtime_info* runtime);
-int32_t check_inputs(runtime_info* runtime);
+int32_t display(Runtime_Info* runtime);
+int32_t check_inputs(Runtime_Info* runtime);
 
-int32_t render_container(runtime_info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color);
+int32_t render_container(Runtime_Info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color);
 
 SDL_FRect fr_add(const SDL_FRect left, const SDL_FRect right);
 SDL_FRect fr_subtract(const SDL_FRect left, const SDL_FRect right);

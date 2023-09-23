@@ -14,7 +14,7 @@ SDL_Color magenta = {255, 0, 255, 255};
 
 sdl_group mgr;
 
-int32_t init_renderer(runtime_info* runtime)
+int32_t init_renderer(Runtime_Info* runtime)
 {
 	SDL_SetMainReady();
 	if (SDL_Init(SDL_INIT_VIDEO))
@@ -42,7 +42,7 @@ int32_t init_renderer(runtime_info* runtime)
 	// this would be really cool to turn into some stack-based type of thing
 	// Also, if resizing is disabled, this can be moved to a static initialization section
 	// orrrr, maybe we can finally do callbacks
-	render_container(runtime, &runtime->layout.window, &runtime->layout.rgb_square, green);
+	render_container(runtime, &runtime->layout.window, &runtime->layout.hsl_square, green);
 	render_container(runtime, &runtime->layout.window, &runtime->layout.hue_slider, green);
 	render_container(runtime, &runtime->layout.window, &runtime->layout.info_container, blue);
 	render_container(runtime, &runtime->layout.window, &runtime->layout.final_sample, green);
@@ -73,7 +73,7 @@ int32_t delay(int32_t delay_time)
 
 // Rename this eventually
 // It's actually HSL
-int32_t render_rgb_square(runtime_info* runtime, SDL_FRect* container)
+int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 {
 	HSL_Color active_hsl = runtime->active_hsl;
 	SDL_Color hsl_pixel;
@@ -83,7 +83,6 @@ int32_t render_rgb_square(runtime_info* runtime, SDL_FRect* container)
 
 	// I guess not much other way than good ol' n^2
 	// hmmm we'll fix this later
-
 	active_hsl.s = 0;
 	active_hsl.l = 0;
 	for (int r = 0; r < container->w; r++)
@@ -114,7 +113,7 @@ int32_t render_rgb_square(runtime_info* runtime, SDL_FRect* container)
 	return 0;
 }
 
-int32_t render_color_preview(runtime_info* runtime, SDL_FRect* container)
+int32_t render_color_preview(Runtime_Info* runtime, SDL_FRect* container)
 {
 	runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(runtime->active_rgb));
@@ -125,7 +124,8 @@ int32_t render_color_preview(runtime_info* runtime, SDL_FRect* container)
 
 // https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
 // This is horrible horrible horrible
-int32_t render_info_boxes(runtime_info* runtime, SDL_FRect* container)
+// Look away
+int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 {
 	char red_string[32];
 	char blu_string[32];
@@ -179,7 +179,7 @@ int32_t render_info_boxes(runtime_info* runtime, SDL_FRect* container)
 	SDL_DestroyTexture(runtime->layout.lum_component_text_tex);
 }
 
-int32_t render_vertical_hue_spectrum(runtime_info* runtime, SDL_FRect* container)
+int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container)
 {
 
 	int hue_slice_scale = container->h;
@@ -202,7 +202,7 @@ int32_t render_vertical_hue_spectrum(runtime_info* runtime, SDL_FRect* container
 }
 
 // REALLY this should be "generate layout", and not a true rendering step
-int32_t render_container(runtime_info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color)
+int32_t render_container(Runtime_Info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(color));
 	child->real = fr_margin_adjust(*parent, child->rel);
@@ -210,7 +210,7 @@ int32_t render_container(runtime_info* runtime, SDL_FRect* parent, Layout_Rect* 
 	return 0;
 }
 
-int32_t display(runtime_info* runtime)
+int32_t display(Runtime_Info* runtime)
 {
 	SDL_SetRenderDrawColor(mgr.rend, 0xCB, 0xCB, 0xCB, 0xCB);
 	SDL_RenderClear(mgr.rend);
@@ -219,14 +219,14 @@ int32_t display(runtime_info* runtime)
 
 	render_color_preview(runtime, &runtime->layout.final_sample.real);
 	render_vertical_hue_spectrum(runtime, &runtime->layout.hue_slider.real);
-	render_rgb_square(runtime, &runtime->layout.rgb_square.real);
+	render_hsl_square(runtime, &runtime->layout.hsl_square.real);
 	render_info_boxes(runtime, &runtime->layout.info_boxes.real);
 
 	SDL_RenderPresent(mgr.rend);
 	return 0;
 }
 
-int32_t check_inputs(runtime_info* runtime)
+int32_t check_inputs(Runtime_Info* runtime)
 {
 	while(SDL_PollEvent(&(mgr.event)))
 	{
