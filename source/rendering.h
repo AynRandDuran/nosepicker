@@ -18,9 +18,6 @@ int32_t check_inputs(Runtime_Info* runtime);
 
 int32_t render_container(Runtime_Info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color);
 
-SDL_FRect fr_add(const SDL_FRect left, const SDL_FRect right);
-SDL_FRect fr_subtract(const SDL_FRect left, const SDL_FRect right);
-SDL_FRect fr_mult(const SDL_FRect left, const SDL_FRect right);
 SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child);
 SDL_Color hsl_to_rgb (const HSL_Color hsl);
 SDL_Color wikipedia_hsl_to_rgb (const HSL_Color hsl);

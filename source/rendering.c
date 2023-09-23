@@ -204,9 +204,7 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 // REALLY this should be "generate layout", and not a true rendering step
 int32_t render_container(Runtime_Info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color)
 {
-	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(color));
 	child->real = fr_margin_adjust(*parent, child->rel);
-
 	return 0;
 }
 
@@ -228,40 +226,47 @@ int32_t display(Runtime_Info* runtime)
 
 int32_t check_inputs(Runtime_Info* runtime)
 {
+	int move_speed = 1;
 	while(SDL_PollEvent(&(mgr.event)))
 	{
 		if (mgr.event.type == SDL_KEYDOWN)
 		{
 			switch(mgr.event.key.keysym.sym)
 			{
+
 				case SDLK_q:
 					runtime->keep_alive = 0;
 					break;
+
+				case SDLK_LSHIFT:
+				case SDLK_RSHIFT:
+					move_speed = 4;
+
 				case SDLK_b:
-					runtime->active_hsl.h += 1;
+					runtime->active_hsl.h += move_speed * 1;
 					if(runtime->active_hsl.h > 360)
 						runtime->active_hsl.h -= 360;
 					break;
 				case SDLK_n:
-					runtime->active_hsl.h -= 1;
+					runtime->active_hsl.h -= move_speed * 1;
 					if(runtime->active_hsl.h < 0)
 						runtime->active_hsl.h += 360;
 					break;
 				case SDLK_k:
 					if(runtime->active_hsl.l < 100)
-						runtime->active_hsl.l += 1;
+						runtime->active_hsl.l += move_speed * 1;
 					break;
 				case SDLK_j:
 					if(runtime->active_hsl.l > 0)
-						runtime->active_hsl.l -= 1;
+						runtime->active_hsl.l -= move_speed * 1;
 					break;
 				case SDLK_l:
 					if(runtime->active_hsl.s < 100)
-						runtime->active_hsl.s += 1;
+						runtime->active_hsl.s += move_speed * 1;
 					break;
 				case SDLK_h:
 					if(runtime->active_hsl.s > 0)
-						runtime->active_hsl.s -= 1;
+						runtime->active_hsl.s -= move_speed * 1;
 					break;
 			}
 		}
@@ -269,40 +274,6 @@ int32_t check_inputs(Runtime_Info* runtime)
 
 	return 0;
 }
-
-SDL_FRect fr_subtract(const SDL_FRect left, const SDL_FRect right)
-{
-	return
-	(SDL_FRect){
-		left.x - right.x,
-		left.y - right.y,
-		left.w - right.w,
-		left.h - right.h
-	};
-}
-
-SDL_FRect fr_add(const SDL_FRect left, const SDL_FRect right)
-{
-	return
-	(SDL_FRect){
-		left.x + right.x,
-		left.y + right.y,
-		left.w + right.w,
-		left.h + right.h
-	};
-}
-
-SDL_FRect fr_mult(const SDL_FRect left, const SDL_FRect right)
-{
-	return
-	(SDL_FRect){
-		left.x * right.x,
-		left.y * right.y,
-		left.w * right.w,
-		left.h * right.h
-	};
-}
-
 // Math out placement for a relative rect onto a concrete parent
 SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child)
 {
