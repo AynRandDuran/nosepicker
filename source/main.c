@@ -53,12 +53,15 @@ int main(void)
 		delay(time_step - frameproc_ms);
 	}
 
+	TTF_Quit();
+
 	return 0;
 }
 
 void killterm_handler(int signum)
 {
-	shutdown_renderer();
+	shutdown_renderer(&runtime);
+	TTF_Quit();
 	exit(0);
 }
 

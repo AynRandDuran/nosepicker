@@ -14,6 +14,24 @@ SDL_Color magenta = {255, 0, 255, 255};
 
 sdl_group mgr;
 
+int32_t refresh_ui(Runtime_Info* runtime)
+{
+	// this would be really cool to turn into some stack-based type of thing
+	render_container(&runtime->layout.window, &runtime->layout.hsl_square);
+	render_container(&runtime->layout.window, &runtime->layout.hue_slider);
+	render_container(&runtime->layout.window, &runtime->layout.info_container);
+	render_container(&runtime->layout.window, &runtime->layout.final_sample);
+	render_container(&runtime->layout.info_container.real, &runtime->layout.info_boxes);
+	render_container(&runtime->layout.info_boxes.real, &runtime->layout.rgb_info);
+	render_container(&runtime->layout.rgb_info.real, &runtime->layout.red_component.body);
+	render_container(&runtime->layout.rgb_info.real, &runtime->layout.green_component.body);
+	render_container(&runtime->layout.rgb_info.real, &runtime->layout.blue_component.body);
+	render_container(&runtime->layout.info_boxes.real, &runtime->layout.hsl_info);
+	render_container(&runtime->layout.hsl_info.real, &runtime->layout.hue_component.body);
+	render_container(&runtime->layout.hsl_info.real, &runtime->layout.sat_component.body);
+	render_container(&runtime->layout.hsl_info.real, &runtime->layout.lum_component.body);
+}
+
 int32_t init_renderer(Runtime_Info* runtime)
 {
 	SDL_SetMainReady();
@@ -39,26 +57,25 @@ int32_t init_renderer(Runtime_Info* runtime)
 
 	SDL_SetRenderDrawBlendMode(mgr.rend, SDL_BLENDMODE_BLEND);
 
-	// this would be really cool to turn into some stack-based type of thing
-	// Also, if resizing is disabled, this can be moved to a static initialization section
-	// orrrr, maybe we can finally do callbacks
-	render_container(runtime, &runtime->layout.window, &runtime->layout.hsl_square, green);
-	render_container(runtime, &runtime->layout.window, &runtime->layout.hue_slider, green);
-	render_container(runtime, &runtime->layout.window, &runtime->layout.info_container, blue);
-	render_container(runtime, &runtime->layout.window, &runtime->layout.final_sample, green);
-	render_container(runtime, &runtime->layout.info_container.real, &runtime->layout.info_boxes, green);
-	render_container(runtime, &runtime->layout.info_boxes.real, &runtime->layout.rgb_info, black);
-	render_container(runtime, &runtime->layout.rgb_info.real, &runtime->layout.red, red);
-	render_container(runtime, &runtime->layout.rgb_info.real, &runtime->layout.green, green);
-	render_container(runtime, &runtime->layout.rgb_info.real, &runtime->layout.blue, blue);
-	render_container(runtime, &runtime->layout.info_boxes.real, &runtime->layout.hsl_info, white);
-	render_container(runtime, &runtime->layout.hsl_info.real, &runtime->layout.hue, green);
-	render_container(runtime, &runtime->layout.hsl_info.real, &runtime->layout.saturation, blue);
-	render_container(runtime, &runtime->layout.hsl_info.real, &runtime->layout.luminence, red);
+	init_text_container(&runtime->layout.red_component, 64);
+	init_text_container(&runtime->layout.green_component, 64);
+	init_text_container(&runtime->layout.blue_component, 64);
+	init_text_container(&runtime->layout.hue_component, 64);
+	init_text_container(&runtime->layout.sat_component, 64);
+	init_text_container(&runtime->layout.lum_component, 64);
+
+	refresh_ui(runtime);
 }
 
-int32_t shutdown_renderer()
+int32_t shutdown_renderer(Runtime_Info* runtime)
 {
+	free_text_container(&runtime->layout.red_component);
+	free_text_container(&runtime->layout.green_component);
+	free_text_container(&runtime->layout.blue_component);
+	free_text_container(&runtime->layout.hue_component);
+	free_text_container(&runtime->layout.sat_component);
+	free_text_container(&runtime->layout.lum_component);
+
 	SDL_DestroyRenderer(mgr.rend);
 	SDL_DestroyWindow(mgr.win);
 	SDL_Quit();
@@ -122,61 +139,64 @@ int32_t render_color_preview(Runtime_Info* runtime, SDL_FRect* container)
 	return 0;
 }
 
+// I'd love if this pre-alloc'd surface and texture, but it looks like
+// SDL_TTF just doesn't work that way
+int32_t init_text_container(Text_Container* tc, size_t text_size)
+{
+	tc->text = (char*)malloc(sizeof(char) * text_size);
+	tc->text_len = text_size;
+	return 0;
+}
+
+// Inter-frame SDL cleanup until I figure out a good solution that doesn't
+// involve creating a whole new surface and texture every single frame
+int32_t release_text_container(Text_Container* tc)
+{
+	if (tc->surface)
+		SDL_FreeSurface(tc->surface);
+	if (tc->texture)
+		SDL_DestroyTexture(tc->texture);
+
+	tc->surface = NULL;
+	tc->texture = NULL;
+}
+
+// Clean up the whole thing, when we're done with it for good
+int32_t free_text_container(Text_Container* tc)
+{
+	release_text_container(tc);
+	free(tc->text);
+}
+
+int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
+{
+	tc->surface = TTF_RenderText_Solid(runtime->font, tc->text, black);
+	tc->texture = SDL_CreateTextureFromSurface(mgr.rend, tc->surface);
+	SDL_RenderCopyF(mgr.rend, tc->texture, NULL, &tc->body.real);
+
+	// we'll keep this implicit to rendering for now to keep
+	// the bigger rendering picture a bit cleaner
+	release_text_container(&runtime->layout.red_component);
+	return 0;
+}
+
 // https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
-// This is horrible horrible horrible
-// Look away
 int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 {
-	char red_string[32];
-	char blu_string[32];
-	char grn_string[32];
-	char hue_string[32];
-	char sat_string[32];
-	char lum_string[32];
+	sprintf(runtime->layout.red_component.text, "R:%d/%X\0", runtime->active_rgb.r, runtime->active_rgb.r);
+	sprintf(runtime->layout.green_component.text, "G:%d/%X\0", runtime->active_rgb.g, runtime->active_rgb.g);
+	sprintf(runtime->layout.blue_component.text, "B:%d/%X\0", runtime->active_rgb.b, runtime->active_rgb.b);
+	sprintf(runtime->layout.hue_component.text, "H:%d/%X\0", runtime->active_hsl.h, runtime->active_hsl.h);
+	sprintf(runtime->layout.sat_component.text, "S:%d/%X\0", runtime->active_hsl.s, runtime->active_hsl.s);
+	sprintf(runtime->layout.lum_component.text, "L:%d/%X\0", runtime->active_hsl.l, runtime->active_hsl.l);
 
-	sprintf(red_string, "R:%d/%X", runtime->active_rgb.r, runtime->active_rgb.r);
-	sprintf(grn_string, "G:%d/%X", runtime->active_rgb.g, runtime->active_rgb.g);
-	sprintf(blu_string, "B:%d/%X", runtime->active_rgb.b, runtime->active_rgb.b);
-	sprintf(hue_string, "H:%d/%X", runtime->active_hsl.h, runtime->active_hsl.h);
-	sprintf(sat_string, "S:%d/%X", runtime->active_hsl.s, runtime->active_hsl.s);
-	sprintf(lum_string, "L:%d/%X", runtime->active_hsl.l, runtime->active_hsl.l);
-
-	runtime->layout.red_component_text_surface		= TTF_RenderText_Solid(runtime->font, red_string, black);
-	runtime->layout.green_component_text_surface	= TTF_RenderText_Solid(runtime->font, grn_string, black);
-	runtime->layout.blue_component_text_surface		= TTF_RenderText_Solid(runtime->font, blu_string, black);
-	runtime->layout.hue_component_text_surface		= TTF_RenderText_Solid(runtime->font, hue_string, black);
-	runtime->layout.sat_component_text_surface		= TTF_RenderText_Solid(runtime->font, sat_string, black);
-	runtime->layout.lum_component_text_surface		= TTF_RenderText_Solid(runtime->font, lum_string, black);
-
-	runtime->layout.red_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.red_component_text_surface);
-	runtime->layout.green_component_text_tex			= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.green_component_text_surface);
-	runtime->layout.blue_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.blue_component_text_surface);
-	runtime->layout.hue_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.hue_component_text_surface);
-	runtime->layout.sat_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.sat_component_text_surface);
-	runtime->layout.lum_component_text_tex				= SDL_CreateTextureFromSurface(mgr.rend, runtime->layout.lum_component_text_surface);
-
-	// Now we can render
-	SDL_RenderCopyF(mgr.rend, runtime->layout.red_component_text_tex,		NULL, &runtime->layout.red.real);
-	SDL_RenderCopyF(mgr.rend, runtime->layout.green_component_text_tex,	NULL, &runtime->layout.green.real);
-	SDL_RenderCopyF(mgr.rend, runtime->layout.blue_component_text_tex,	NULL, &runtime->layout.blue.real);
-	SDL_RenderCopyF(mgr.rend, runtime->layout.hue_component_text_tex,		NULL, &runtime->layout.hue.real);
-	SDL_RenderCopyF(mgr.rend, runtime->layout.sat_component_text_tex,		NULL, &runtime->layout.saturation.real);
-	SDL_RenderCopyF(mgr.rend, runtime->layout.lum_component_text_tex,		NULL, &runtime->layout.luminence.real);
-
-	// Cleanup
-	SDL_FreeSurface(runtime->layout.red_component_text_surface);
-	SDL_FreeSurface(runtime->layout.green_component_text_surface);
-	SDL_FreeSurface(runtime->layout.blue_component_text_surface);
-	SDL_FreeSurface(runtime->layout.hue_component_text_surface);
-	SDL_FreeSurface(runtime->layout.sat_component_text_surface);
-	SDL_FreeSurface(runtime->layout.lum_component_text_surface);
-
-	SDL_DestroyTexture(runtime->layout.red_component_text_tex);
-	SDL_DestroyTexture(runtime->layout.green_component_text_tex);
-	SDL_DestroyTexture(runtime->layout.blue_component_text_tex);
-	SDL_DestroyTexture(runtime->layout.hue_component_text_tex);
-	SDL_DestroyTexture(runtime->layout.sat_component_text_tex);
-	SDL_DestroyTexture(runtime->layout.lum_component_text_tex);
+	render_text_container(runtime, &runtime->layout.red_component);
+	render_text_container(runtime, &runtime->layout.green_component);
+	render_text_container(runtime, &runtime->layout.blue_component);
+	render_text_container(runtime, &runtime->layout.hue_component);
+	render_text_container(runtime, &runtime->layout.sat_component);
+	render_text_container(runtime, &runtime->layout.lum_component);
+	return 0;
 }
 
 int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container)
@@ -202,7 +222,7 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 }
 
 // REALLY this should be "generate layout", and not a true rendering step
-int32_t render_container(Runtime_Info* runtime, SDL_FRect* parent, Layout_Rect* child, SDL_Color color)
+int32_t render_container(SDL_FRect* parent, Layout_Rect* child)
 {
 	child->real = fr_margin_adjust(*parent, child->rel);
 	return 0;

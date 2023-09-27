@@ -42,6 +42,16 @@ typedef struct
 
 typedef struct
 {
+	Layout_Rect body;
+	SDL_Surface* surface;
+	SDL_Texture* texture;
+	size_t text_len;
+	char* text;
+
+} Text_Container;
+
+typedef struct
+{
 	// Tabbing these to visually indicate layout
 	SDL_FRect window;
 		Layout_Rect hsl_square; // big clicky draggy square
@@ -50,25 +60,13 @@ typedef struct
 			Layout_Rect final_sample; // small square showing full selected color
 			Layout_Rect info_boxes;
 				Layout_Rect rgb_info;
-					Layout_Rect red;
-					SDL_Surface* red_component_text_surface;
-					SDL_Texture* red_component_text_tex;
-					Layout_Rect green;
-					SDL_Surface* green_component_text_surface;
-					SDL_Texture* green_component_text_tex;
-					Layout_Rect blue;
-					SDL_Surface* blue_component_text_surface;
-					SDL_Texture* blue_component_text_tex;
+					Text_Container red_component;
+					Text_Container green_component;
+					Text_Container blue_component;
 				Layout_Rect hsl_info;
-					Layout_Rect hue;
-					SDL_Surface* hue_component_text_surface;
-					SDL_Texture* hue_component_text_tex;
-					Layout_Rect saturation;
-					SDL_Surface* sat_component_text_surface;
-					SDL_Texture* sat_component_text_tex;
-					Layout_Rect luminence;
-					SDL_Surface* lum_component_text_surface;
-					SDL_Texture* lum_component_text_tex;
+					Text_Container hue_component;
+					Text_Container sat_component;
+					Text_Container lum_component;
 
 } Window_Layout;
 
