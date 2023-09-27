@@ -22,18 +22,17 @@ Window_Layout config_layout = {
 	.info_boxes.rel						=	(SDL_FRect){.x = 0.25, .y = 0.00, .w = 0.75, .h = 1.00},
 	.rgb_info.rel							=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 1.00, .h = 0.50},
 	.red_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00},
-	.green_component.body.rel	=	(SDL_FRect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00},
-	.blue_component.body.rel	=	(SDL_FRect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00},
-	.hsl_info.rel							=	(SDL_FRect){.x = 0.00, .y = 0.50, .w = 1.00, .h = 0.50},
+	.green_component.body.rel	=	(SDL_FRect){.x = 0.00, .y = 0.40, .w = 0.30, .h = 1.00},
+	.blue_component.body.rel	=	(SDL_FRect){.x = 0.00, .y = 0.80, .w = 0.30, .h = 1.00},
+	.hsl_info.rel							=	(SDL_FRect){.x = 0.50, .y = 0.00, .w = 1.00, .h = 0.50},
 	.hue_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00},
-	.sat_component.body.rel		=	(SDL_FRect){.x = 0.35, .y = 0.00, .w = 0.30, .h = 1.00},
-	.lum_component.body.rel		=	(SDL_FRect){.x = 0.70, .y = 0.00, .w = 0.30, .h = 1.00}
+	.sat_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.40, .w = 0.30, .h = 1.00},
+	.lum_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.80, .w = 0.30, .h = 1.00}
 };
 
 // For now we need a full path, maybe OpenFont can do automatic lookup
 const char config_font_path[] = "/usr/share/fonts/TTF/iosevka-fixed-regular.ttf";
-// This currently acts more like a static resolution scale rather than font size
-const int config_font_size = 128;
+const int config_font_size = 36;
 const int config_framerate = 30;
 
 #endif //__PICKER_CONFIG__

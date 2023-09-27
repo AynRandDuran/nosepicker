@@ -170,8 +170,17 @@ int32_t free_text_container(Text_Container* tc)
 
 int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 {
+	// basics
 	tc->surface = TTF_RenderText_Solid(runtime->font, tc->text, black);
 	tc->texture = SDL_CreateTextureFromSurface(mgr.rend, tc->surface);
+
+	// Adjust text rendering so it doesn't fill the whole element
+	int width, height;
+	SDL_QueryTexture(tc->texture, NULL, NULL, &width, &height);
+	tc->body.real.w = (float)width;
+	tc->body.real.h = (float)height;
+
+	// slap it in there
 	SDL_RenderCopyF(mgr.rend, tc->texture, NULL, &tc->body.real);
 
 	// we'll keep this implicit to rendering for now to keep
@@ -183,12 +192,12 @@ int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 // https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
 int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 {
-	sprintf(runtime->layout.red_component.text, "R:%d/%X\0", runtime->active_rgb.r, runtime->active_rgb.r);
-	sprintf(runtime->layout.green_component.text, "G:%d/%X\0", runtime->active_rgb.g, runtime->active_rgb.g);
-	sprintf(runtime->layout.blue_component.text, "B:%d/%X\0", runtime->active_rgb.b, runtime->active_rgb.b);
-	sprintf(runtime->layout.hue_component.text, "H:%d/%X\0", runtime->active_hsl.h, runtime->active_hsl.h);
-	sprintf(runtime->layout.sat_component.text, "S:%d/%X\0", runtime->active_hsl.s, runtime->active_hsl.s);
-	sprintf(runtime->layout.lum_component.text, "L:%d/%X\0", runtime->active_hsl.l, runtime->active_hsl.l);
+	sprintf(runtime->layout.red_component.text,		"R:%03d/x%02X\0", runtime->active_rgb.r, runtime->active_rgb.r);
+	sprintf(runtime->layout.green_component.text,	"G:%03d/x%02X\0", runtime->active_rgb.g, runtime->active_rgb.g);
+	sprintf(runtime->layout.blue_component.text,	"B:%03d/x%02X\0", runtime->active_rgb.b, runtime->active_rgb.b);
+	sprintf(runtime->layout.hue_component.text,		"H:%03d/x%02X\0", runtime->active_hsl.h, runtime->active_hsl.h);
+	sprintf(runtime->layout.sat_component.text,		"S:%03d/x%02X\0", runtime->active_hsl.s, runtime->active_hsl.s);
+	sprintf(runtime->layout.lum_component.text,		"L:%03d/x%02X\0", runtime->active_hsl.l, runtime->active_hsl.l);
 
 	render_text_container(runtime, &runtime->layout.red_component);
 	render_text_container(runtime, &runtime->layout.green_component);
