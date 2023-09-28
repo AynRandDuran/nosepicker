@@ -14,7 +14,7 @@ SDL_Color magenta = {255, 0, 255, 255};
 
 sdl_group mgr;
 
-int32_t refresh_ui(Runtime_Info* runtime)
+int32_t refresh_layout(Runtime_Info* runtime)
 {
 	// this would be really cool to turn into some stack-based type of thing
 	render_container(&runtime->layout.window, &runtime->layout.hsl_square);
@@ -64,7 +64,7 @@ int32_t init_renderer(Runtime_Info* runtime)
 	init_text_container(&runtime->layout.sat_component, 64);
 	init_text_container(&runtime->layout.lum_component, 64);
 
-	refresh_ui(runtime);
+	refresh_layout(runtime);
 }
 
 int32_t shutdown_renderer(Runtime_Info* runtime)
@@ -230,10 +230,20 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 	return 0;
 }
 
-// REALLY this should be "generate layout", and not a true rendering step
 int32_t render_container(SDL_FRect* parent, Layout_Rect* child)
 {
 	child->real = fr_margin_adjust(*parent, child->rel);
+	return 0;
+}
+
+int32_t render_layout(Runtime_Info* runtime, Window_Layout* layout)
+{
+	runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
+	render_color_preview(runtime, &layout->final_sample.real);
+	render_vertical_hue_spectrum(runtime, &layout->hue_slider.real);
+	render_hsl_square(runtime, &layout->hsl_square.real);
+	render_info_boxes(runtime, &layout->info_boxes.real);
+
 	return 0;
 }
 
@@ -242,35 +252,22 @@ int32_t display(Runtime_Info* runtime)
 	SDL_SetRenderDrawColor(mgr.rend, 0xCB, 0xCB, 0xCB, 0xCB);
 	SDL_RenderClear(mgr.rend);
 
-	runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
-
-	render_color_preview(runtime, &runtime->layout.final_sample.real);
-	render_vertical_hue_spectrum(runtime, &runtime->layout.hue_slider.real);
-	render_hsl_square(runtime, &runtime->layout.hsl_square.real);
-	render_info_boxes(runtime, &runtime->layout.info_boxes.real);
+	render_layout(runtime, &runtime->layout);
 
 	SDL_RenderPresent(mgr.rend);
+
 	return 0;
 }
 
+int move_speed = 1;
 int32_t check_inputs(Runtime_Info* runtime)
 {
-	int move_speed = 1;
 	while(SDL_PollEvent(&(mgr.event)))
 	{
 		if (mgr.event.type == SDL_KEYDOWN)
 		{
 			switch(mgr.event.key.keysym.sym)
 			{
-
-				case SDLK_q:
-					runtime->keep_alive = 0;
-					break;
-
-				case SDLK_LSHIFT:
-				case SDLK_RSHIFT:
-					move_speed = 4;
-
 				case SDLK_b:
 					runtime->active_hsl.h += move_speed * 1;
 					if(runtime->active_hsl.h > 360)
@@ -282,20 +279,42 @@ int32_t check_inputs(Runtime_Info* runtime)
 						runtime->active_hsl.h += 360;
 					break;
 				case SDLK_k:
-					if(runtime->active_hsl.l < 100)
-						runtime->active_hsl.l += move_speed * 1;
+					runtime->active_hsl.l += move_speed * 1;
+					if(runtime->active_hsl.l > 100)
+						runtime->active_hsl.l = 100;
 					break;
 				case SDLK_j:
-					if(runtime->active_hsl.l > 0)
-						runtime->active_hsl.l -= move_speed * 1;
+					runtime->active_hsl.l -= move_speed * 1;
+					if(runtime->active_hsl.l < 0)
+						runtime->active_hsl.l = 0;
 					break;
 				case SDLK_l:
-					if(runtime->active_hsl.s < 100)
-						runtime->active_hsl.s += move_speed * 1;
+					runtime->active_hsl.s += move_speed * 1;
+					if(runtime->active_hsl.s > 100)
+						runtime->active_hsl.s = 100;
 					break;
 				case SDLK_h:
-					if(runtime->active_hsl.s > 0)
-						runtime->active_hsl.s -= move_speed * 1;
+					runtime->active_hsl.s -= move_speed * 1;
+					if(runtime->active_hsl.s < 0)
+						runtime->active_hsl.s = 0;
+					break;
+
+				case SDLK_LSHIFT:
+				case SDLK_RSHIFT:
+					move_speed = 4;
+					break;
+			}
+		}
+		if (mgr.event.type == SDL_KEYUP)
+		{
+			switch(mgr.event.key.keysym.sym)
+			{
+				case SDLK_q:
+					runtime->keep_alive = 0;
+					break;
+				case SDLK_RSHIFT:
+				case SDLK_LSHIFT:
+					move_speed = 1;
 					break;
 			}
 		}
@@ -303,6 +322,7 @@ int32_t check_inputs(Runtime_Info* runtime)
 
 	return 0;
 }
+
 // Math out placement for a relative rect onto a concrete parent
 SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child)
 {
@@ -310,7 +330,6 @@ SDL_FRect fr_margin_adjust(const SDL_FRect parent, const Relative_Rect child)
 	(SDL_FRect){
 		.x = parent.x + ( parent.w * (child.x ) ),
 		.y = parent.y + ( parent.h * (child.y ) ),
-
 		.w = parent.w * child.w,
 		.h = parent.h * child.h,
 	};
@@ -323,6 +342,7 @@ float hsl_to_rgb_alt_internal(const HSL_Color hsl, int n)
 	float S = (float)hsl.s/100.0f;
 	float a = S * MIN(L, 1-L);
 	float k = fmod((n + (H/30.0)), 12.0);
+
 	return L - a * MAX(-1, MIN(k-3, MIN(9-k, 1)));
 }
 
