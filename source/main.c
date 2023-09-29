@@ -23,9 +23,7 @@ int init()
 	TTF_Init();
 	runtime.font = TTF_OpenFont(config_font_path, config_font_size);
 	assert(runtime.font != NULL);
-
 	init_renderer(&runtime);
-
 	runtime.keep_alive = 1;
 
 	return 0;
@@ -54,15 +52,14 @@ int main(void)
 	}
 
 	TTF_Quit();
-
 	int32_t refresh_layout(Runtime_Info* runtime);
-	refresh_layout(NULL);
 	return 0;
 }
 
 void killterm_handler(int signum)
 {
 	shutdown_renderer(&runtime);
+	TTF_CloseFont(runtime.font);
 	TTF_Quit();
 	exit(0);
 }
