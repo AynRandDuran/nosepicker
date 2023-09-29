@@ -1,15 +1,17 @@
 ## To Do
 
-- Modal interface
-- Color export
-- Cleanup
-    * [ ] Text rendering
-    * [ ] Layout rendering
-    * [ ] Old gameframe cruft needs to go
-- Config header
+- Mode-based keybinds
+- UI library
+    > Move UI stuff into a standalone library some day, because it's kinda cool
 
 ## Doing
 
 
 ## Done
 
+- Color export
+- Config header
+- Cleanup
+    * [x] Text rendering
+    * [x] Layout rendering
+    * [x] Old gameframe cruft needs to go
