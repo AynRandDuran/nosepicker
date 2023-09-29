@@ -55,6 +55,8 @@ int main(void)
 
 	TTF_Quit();
 
+	int32_t refresh_layout(Runtime_Info* runtime);
+	refresh_layout(NULL);
 	return 0;
 }
 

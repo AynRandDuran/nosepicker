@@ -1,9 +1,14 @@
 #include <SDL2/SDL_ttf.h>
 #include <sys/param.h>
+#include <assert.h>
 
 #include "rendering.h"
 
 #define unroll_sdl_color(color) color.r, color.g, color.b, color.a
+#define NULL_CHECK(ptr) \
+	if (!ptr)	{ 					\
+		printf("Nullptr check fail [%s %s:%d]\n", #ptr, __FILE__, __LINE__); \
+		return 1;}					\
 
 SDL_Color red = {255, 0, 0, 255};
 SDL_Color green = {0, 255, 0, 255};
@@ -16,6 +21,7 @@ sdl_group mgr;
 
 int32_t refresh_layout(Runtime_Info* runtime)
 {
+	NULL_CHECK(runtime);
 	// this would be really cool to turn into some stack-based type of thing
 	render_container(&runtime->layout.window, &runtime->layout.hsl_square);
 	render_container(&runtime->layout.window, &runtime->layout.hue_slider);
@@ -36,6 +42,7 @@ int32_t refresh_layout(Runtime_Info* runtime)
 
 int32_t init_renderer(Runtime_Info* runtime)
 {
+	NULL_CHECK(runtime);
 	SDL_SetMainReady();
 	if (SDL_Init(SDL_INIT_VIDEO))
 	{
@@ -73,6 +80,7 @@ int32_t init_renderer(Runtime_Info* runtime)
 
 int32_t shutdown_renderer(Runtime_Info* runtime)
 {
+	NULL_CHECK(runtime);
 	free_text_container(&runtime->layout.red_component);
 	free_text_container(&runtime->layout.green_component);
 	free_text_container(&runtime->layout.blue_component);
@@ -98,6 +106,9 @@ int32_t delay(int32_t delay_time)
 // It's actually HSL
 int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(container);
+
 	HSL_Color active_hsl = runtime->active_hsl;
 	SDL_Color hsl_pixel;
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(runtime->active_rgb));
@@ -137,6 +148,9 @@ int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 
 int32_t render_color_preview(Runtime_Info* runtime, SDL_FRect* container)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(container);
+
 	runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(runtime->active_rgb));
 	SDL_RenderFillRectF(mgr.rend, container);
@@ -148,8 +162,12 @@ int32_t render_color_preview(Runtime_Info* runtime, SDL_FRect* container)
 // SDL_TTF just doesn't work that way
 int32_t init_text_container(Text_Container* tc, size_t text_size)
 {
+	NULL_CHECK(tc);
+
 	tc->text = (char*)malloc(sizeof(char) * text_size);
 	tc->text_len = text_size;
+
+	NULL_CHECK(tc->text);
 	return 0;
 }
 
@@ -157,10 +175,10 @@ int32_t init_text_container(Text_Container* tc, size_t text_size)
 // involve creating a whole new surface and texture every single frame
 int32_t release_text_container(Text_Container* tc)
 {
-	if (tc->surface)
-		SDL_FreeSurface(tc->surface);
-	if (tc->texture)
-		SDL_DestroyTexture(tc->texture);
+	NULL_CHECK(tc);
+
+	SDL_FreeSurface(tc->surface);
+	SDL_DestroyTexture(tc->texture);
 
 	tc->surface = NULL;
 	tc->texture = NULL;
@@ -171,6 +189,9 @@ int32_t release_text_container(Text_Container* tc)
 // Clean up the whole thing, when we're done with it for good
 int32_t free_text_container(Text_Container* tc)
 {
+	NULL_CHECK(tc);
+	NULL_CHECK(tc->text);
+
 	release_text_container(tc);
 	free(tc->text);
 
@@ -179,9 +200,13 @@ int32_t free_text_container(Text_Container* tc)
 
 int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(tc);
 	// basics
 	tc->surface = TTF_RenderText_Solid(runtime->font, tc->text, black);
 	tc->texture = SDL_CreateTextureFromSurface(mgr.rend, tc->surface);
+	NULL_CHECK(tc->surface);
+	NULL_CHECK(tc->texture);
 
 	// Adjust text rendering so it doesn't fill the whole element
 	int width, height;
@@ -201,6 +226,9 @@ int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 // https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
 int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(container);
+
 	snprintf(runtime->layout.red_component.text,	runtime->layout.red_component.text_len, "R:%03d/x%02X", runtime->active_rgb.r, runtime->active_rgb.r);
 	snprintf(runtime->layout.green_component.text,runtime->layout.green_component.text_len, "G:%03d/x%02X", runtime->active_rgb.g, runtime->active_rgb.g);
 	snprintf(runtime->layout.blue_component.text,	runtime->layout.blue_component.text_len, "B:%03d/x%02X", runtime->active_rgb.b, runtime->active_rgb.b);
@@ -219,6 +247,9 @@ int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 
 int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(container);
+
 	int bar_y = runtime->active_hsl.h/360.0f*container->h + container->y;
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
 	SDL_RenderDrawLine(mgr.rend, container->x-16, bar_y, container->w+container->x+16, bar_y);
@@ -237,12 +268,18 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 
 int32_t render_container(SDL_FRect* parent, Layout_Rect* child)
 {
+	NULL_CHECK(parent);
+	NULL_CHECK(child);
+
 	child->real = fr_margin_adjust(*parent, child->rel);
 	return 0;
 }
 
 int32_t render_layout(Runtime_Info* runtime, Window_Layout* layout)
 {
+	NULL_CHECK(runtime);
+	NULL_CHECK(layout);
+
 	runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
 	render_color_preview(runtime, &layout->final_sample.real);
 	render_vertical_hue_spectrum(runtime, &layout->hue_slider.real);
@@ -254,6 +291,8 @@ int32_t render_layout(Runtime_Info* runtime, Window_Layout* layout)
 
 int32_t display(Runtime_Info* runtime)
 {
+	NULL_CHECK(runtime);
+
 	SDL_SetRenderDrawColor(mgr.rend, 0xCB, 0xCB, 0xCB, 0xCB);
 	SDL_RenderClear(mgr.rend);
 
@@ -267,6 +306,8 @@ int32_t display(Runtime_Info* runtime)
 int move_speed = 1;
 int32_t check_inputs(Runtime_Info* runtime)
 {
+	NULL_CHECK(runtime);
+
 	while(SDL_PollEvent(&(mgr.event)))
 	{
 		if (mgr.event.type == SDL_KEYDOWN)
