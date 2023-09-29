@@ -30,6 +30,8 @@ int32_t refresh_layout(Runtime_Info* runtime)
 	render_container(&runtime->layout.hsl_info.real, &runtime->layout.hue_component.body);
 	render_container(&runtime->layout.hsl_info.real, &runtime->layout.sat_component.body);
 	render_container(&runtime->layout.hsl_info.real, &runtime->layout.lum_component.body);
+
+	return 0;
 }
 
 int32_t init_renderer(Runtime_Info* runtime)
@@ -65,6 +67,8 @@ int32_t init_renderer(Runtime_Info* runtime)
 	init_text_container(&runtime->layout.lum_component, 64);
 
 	refresh_layout(runtime);
+
+	return 0;
 }
 
 int32_t shutdown_renderer(Runtime_Info* runtime)
@@ -79,6 +83,8 @@ int32_t shutdown_renderer(Runtime_Info* runtime)
 	SDL_DestroyRenderer(mgr.rend);
 	SDL_DestroyWindow(mgr.win);
 	SDL_Quit();
+
+	return 0;
 }
 
 int32_t delay(int32_t delay_time)
@@ -94,7 +100,6 @@ int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 {
 	HSL_Color active_hsl = runtime->active_hsl;
 	SDL_Color hsl_pixel;
-	SDL_Point draw_point;
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(runtime->active_rgb));
 	SDL_RenderFillRectF(mgr.rend, container);
 
@@ -159,6 +164,8 @@ int32_t release_text_container(Text_Container* tc)
 
 	tc->surface = NULL;
 	tc->texture = NULL;
+
+	return 0;
 }
 
 // Clean up the whole thing, when we're done with it for good
@@ -166,6 +173,8 @@ int32_t free_text_container(Text_Container* tc)
 {
 	release_text_container(tc);
 	free(tc->text);
+
+	return 0;
 }
 
 int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
@@ -192,12 +201,12 @@ int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 // https://stackoverflow.com/questions/22886500/how-to-render-text-in-sdl2
 int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 {
-	sprintf(runtime->layout.red_component.text,		"R:%03d/x%02X\0", runtime->active_rgb.r, runtime->active_rgb.r);
-	sprintf(runtime->layout.green_component.text,	"G:%03d/x%02X\0", runtime->active_rgb.g, runtime->active_rgb.g);
-	sprintf(runtime->layout.blue_component.text,	"B:%03d/x%02X\0", runtime->active_rgb.b, runtime->active_rgb.b);
-	sprintf(runtime->layout.hue_component.text,		"H:%03d/x%02X\0", runtime->active_hsl.h, runtime->active_hsl.h);
-	sprintf(runtime->layout.sat_component.text,		"S:%03d/x%02X\0", runtime->active_hsl.s, runtime->active_hsl.s);
-	sprintf(runtime->layout.lum_component.text,		"L:%03d/x%02X\0", runtime->active_hsl.l, runtime->active_hsl.l);
+	snprintf(runtime->layout.red_component.text,	runtime->layout.red_component.text_len, "R:%03d/x%02X", runtime->active_rgb.r, runtime->active_rgb.r);
+	snprintf(runtime->layout.green_component.text,runtime->layout.green_component.text_len, "G:%03d/x%02X", runtime->active_rgb.g, runtime->active_rgb.g);
+	snprintf(runtime->layout.blue_component.text,	runtime->layout.blue_component.text_len, "B:%03d/x%02X", runtime->active_rgb.b, runtime->active_rgb.b);
+	snprintf(runtime->layout.hue_component.text,	runtime->layout.hue_component.text_len, "H:%03d/x%02X", runtime->active_hsl.h, runtime->active_hsl.h);
+	snprintf(runtime->layout.sat_component.text,	runtime->layout.sat_component.text_len, "S:%03d/x%02X", runtime->active_hsl.s, runtime->active_hsl.s);
+	snprintf(runtime->layout.lum_component.text,	runtime->layout.lum_component.text_len, "L:%03d/x%02X", runtime->active_hsl.l, runtime->active_hsl.l);
 
 	render_text_container(runtime, &runtime->layout.red_component);
 	render_text_container(runtime, &runtime->layout.green_component);
@@ -210,10 +219,6 @@ int32_t render_info_boxes(Runtime_Info* runtime, SDL_FRect* container)
 
 int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container)
 {
-
-	int hue_slice_scale = container->h;
-	float hue_slice_height = hue_slice_scale/360.0f;
-
 	int bar_y = runtime->active_hsl.h/360.0f*container->h + container->y;
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
 	SDL_RenderDrawLine(mgr.rend, container->x-16, bar_y, container->w+container->x+16, bar_y);
