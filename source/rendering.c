@@ -22,6 +22,13 @@ sdl_group mgr;
 int32_t refresh_layout(Runtime_Info* runtime)
 {
 	NULL_CHECK(runtime);
+
+	int win_w, win_h;
+	// SDL_GetWindowSize(mgr.win, &win_w, &win_h);
+	SDL_GetRendererOutputSize(mgr.rend, &win_w, &win_h);
+	runtime->layout.window.w = win_w;
+	runtime->layout.window.h = win_h;
+
 	// this would be really cool to turn into some stack-based type of thing
 	render_container(&runtime->layout.window, &runtime->layout.hsl_square);
 	render_container(&runtime->layout.window, &runtime->layout.hue_slider);
@@ -50,6 +57,8 @@ int32_t init_renderer(Runtime_Info* runtime)
 		exit(__LINE__);
 	}
 
+	// SDL_WINDOW_RESIZABLE forces terminal swallow and tiling doesn't like it
+	// Figure something out later
 	mgr.win = SDL_CreateWindow("Color Picker", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, runtime->layout.window.w, runtime->layout.window.h, 0);
 	if (mgr.win == NULL)
 	{
@@ -65,6 +74,10 @@ int32_t init_renderer(Runtime_Info* runtime)
 	}
 
 	SDL_SetRenderDrawBlendMode(mgr.rend, SDL_BLENDMODE_BLEND);
+
+	TTF_Init();
+	runtime->font = TTF_OpenFont(runtime->font_path, runtime->font_size);
+	assert(runtime->font != NULL);
 
 	init_text_container(&runtime->layout.red_component, 64);
 	init_text_container(&runtime->layout.green_component, 64);
@@ -88,6 +101,8 @@ int32_t shutdown_renderer(Runtime_Info* runtime)
 	free_text_container(&runtime->layout.sat_component);
 	free_text_container(&runtime->layout.lum_component);
 
+	TTF_CloseFont(runtime->font);
+	TTF_Quit();
 	SDL_DestroyRenderer(mgr.rend);
 	SDL_DestroyWindow(mgr.win);
 	SDL_Quit();

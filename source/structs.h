@@ -77,7 +77,9 @@ typedef struct
 	Window_Layout layout;
 
 	int keep_alive;
-
+	const int framerate;
+	const int font_size;
+	const char font_path[128];
 	TTF_Font* font;
 
 } Runtime_Info;

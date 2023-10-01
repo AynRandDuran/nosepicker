@@ -20,9 +20,6 @@ int init()
 	runtime.active_hsl = (HSL_Color){.h = 0, .s = 100, .l = 50};
 	runtime.active_rgb = hsl_to_rgb(runtime.active_hsl);
 
-	TTF_Init();
-	runtime.font = TTF_OpenFont(config_font_path, config_font_size);
-	assert(runtime.font != NULL);
 	init_renderer(&runtime);
 	runtime.keep_alive = 1;
 
@@ -33,7 +30,7 @@ int main(void)
 {
 	struct timespec ts_start;
 	struct timespec ts_end;
-	float time_step = 1000.0f/config_framerate;
+	float time_step = 1000.0f/runtime.framerate;
 
 	if(init() != 0)
 	{
@@ -51,16 +48,13 @@ int main(void)
 		delay(time_step - frameproc_ms);
 	}
 
-	TTF_Quit();
-	int32_t refresh_layout(Runtime_Info* runtime);
+	shutdown_renderer(&runtime);
 	return 0;
 }
 
 void killterm_handler(int signum)
 {
 	shutdown_renderer(&runtime);
-	TTF_CloseFont(runtime.font);
-	TTF_Quit();
 	exit(0);
 }
 
