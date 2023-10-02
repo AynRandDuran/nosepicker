@@ -2,8 +2,6 @@
 #define __PICKER_CONFIG__
 #include "structs.h"
 
-// Multiple units need to include config.h now
-
 Runtime_Info runtime =
 {
 	.framerate = 30,

@@ -265,13 +265,20 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 	NULL_CHECK(runtime);
 	NULL_CHECK(container);
 
+#if 0
 	int bar_y = runtime->active_hsl.h/360.0f*container->h + container->y;
+	int spectrum_shifter = 0;
+#endif
+
+	int spectrum_shifter = runtime->active_hsl.h + 180;
+	int bar_y = container->h/2 + container->y;
+
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
 	SDL_RenderDrawLine(mgr.rend, container->x-16, bar_y, container->w+container->x+16, bar_y);
 
 	for (int n = 0; n < (int)container->h; n++)
 	{
-		HSL_Color slice_hsl = {((float)n/(float)container->h) * 360, 100, 50};
+		HSL_Color slice_hsl = {spectrum_shifter + (((float)n/(float)container->h) * 360), 100, 50};
 		SDL_Color slice_color = hsl_to_rgb (slice_hsl);
 
 		SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(slice_color));
