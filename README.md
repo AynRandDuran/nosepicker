@@ -15,7 +15,7 @@ The only real dependencies are SDL2 and SDL2_TTF (for text). I sure hope you hav
 
 ### Configure
 Configuration of UI things is done through source/config.h. Most options will be self-explanatory.
-The only thing you'll *really* need to touch is config_font_path -- you probably don't have iosevka installed. Find a font you like and use it. It looks cool with the Pentiment fonts lol. I'll figure out font lookup later.
+The only thing you'll *really* need to touch is font_path -- you probably don't have iosevka installed. Find a font you like and use it. It looks cool with the Pentiment fonts lol. I'll figure out font lookup later.
 The worst part here is the UI system I cooked up. UI components in the config_layout struct are tabbed to be a bit more clear but their dimensions are adjustable relative to the tab-parent above them, so you can rearrange the UI easily enough to your liking. Adjusting master window sizing might require this.
 
 ### Build
