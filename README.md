@@ -7,7 +7,8 @@ A quick and easy color picker for visualizing RGB/HSL
 Adjust saturation in the big square with `H/L`, luminence with `J/K`. Or sat with `J/K` and luminence with `H/L`. I forgot which but now that I think about it, it could go in the config file.
 The hue spectrum slider adjusts with `N/B`.
 Holding either `shift` increases the adjust speed of any other input.
-If it wasn't already obvious, the bottom portion displays the active color in a big square along with RGB and HSL value, in decimal and hex. There is no mouse support as of this release.
+If it wasn't already obvious, the bottom portion displays the active color in a big square along with RGB and HSL value, in decimal and hex.
+Now including mouse support -- click/drag around in the hue spectrum and L/S square to change values.
 
 ## Configure and build
 ### Dependencies

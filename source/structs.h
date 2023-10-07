@@ -82,6 +82,9 @@ typedef struct
 	const char font_path[128];
 	TTF_Font* font;
 
+	SDL_Point mouse_click_pos;
+	int mouse_click;
+
 } Runtime_Info;
 
 #endif // STRUCTS__

@@ -117,6 +117,41 @@ int32_t delay(int32_t delay_time)
 	return 0;
 }
 
+void grab_mouse_state(Runtime_Info* runtime)
+{
+	Uint32 buttons;
+	SDL_PumpEvents();  // make sure we have the latest mouse state.
+	buttons = SDL_GetMouseState(&runtime->mouse_click_pos.x, &runtime->mouse_click_pos.y);
+
+	if ((buttons & SDL_BUTTON_LMASK) != 0) {
+		runtime->mouse_click = 1;
+	}
+}
+
+void clear_mouse_state(Runtime_Info* runtime)
+{
+	runtime->mouse_click = 0;
+}
+
+int32_t is_mouse_down(Runtime_Info* runtime)
+{
+	grab_mouse_state(runtime);
+	int32_t down = runtime->mouse_click;
+	runtime->mouse_click = 0;
+	return down;
+}
+
+int32_t mouse_click_in_container(Runtime_Info* runtime, SDL_FRect* container)
+{
+	if (is_mouse_down(runtime) &&
+			runtime->mouse_click_pos.x >= container->x &&
+			runtime->mouse_click_pos.x <= container->x + container->w &&
+			runtime->mouse_click_pos.y >= container->y &&
+			runtime->mouse_click_pos.y <= container->y + container->h)
+		return 1;
+	return 0;
+}
+
 // Rename this eventually
 // It's actually HSL
 int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
@@ -146,6 +181,12 @@ int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 		}
 	}
 
+	if (mouse_click_in_container(runtime, container))
+	{
+		runtime->active_hsl.s = 100.0f * (runtime->mouse_click_pos.x - container->x) / container->w;
+		runtime->active_hsl.l = 100.0f * (1.0f - ((float)(runtime->mouse_click_pos.y - container->y) / container->h));
+	}
+
 	float s_norm = (float)runtime->active_hsl.s/100.0f;
 	float l_norm = (float)runtime->active_hsl.l/100.0f;
 	SDL_Rect cursor = {
@@ -154,6 +195,7 @@ int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 		.w = 10,
 		.h = 10
 	};
+
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
 	SDL_RenderDrawLine(mgr.rend, container->x-16, cursor.y, container->x+container->w+16, cursor.y);
 	SDL_RenderDrawLine(mgr.rend, cursor.x, container->y-16, cursor.x, container->y+container->h+16);
@@ -217,6 +259,7 @@ int32_t render_text_container(Runtime_Info* runtime, Text_Container* tc)
 {
 	NULL_CHECK(runtime);
 	NULL_CHECK(tc);
+
 	// basics
 	tc->surface = TTF_RenderText_Solid(runtime->font, tc->text, black);
 	tc->texture = SDL_CreateTextureFromSurface(mgr.rend, tc->surface);
@@ -265,13 +308,18 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 	NULL_CHECK(runtime);
 	NULL_CHECK(container);
 
-#if 0
+	if (mouse_click_in_container(runtime, container))
+	{
+		runtime->active_hsl.h = ((runtime->mouse_click_pos.y - container->y) / container->h) * 360;
+	}
+
 	int bar_y = runtime->active_hsl.h/360.0f*container->h + container->y;
 	int spectrum_shifter = 0;
-#endif
 
+#if 0
 	int spectrum_shifter = runtime->active_hsl.h + 180;
 	int bar_y = container->h/2 + container->y;
+#endif
 
 	SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(black));
 	SDL_RenderDrawLine(mgr.rend, container->x-16, bar_y, container->w+container->x+16, bar_y);
@@ -284,7 +332,6 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 		SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(slice_color));
 		SDL_RenderDrawLine(mgr.rend, container->x, container->y + n, container->w+container->x, container->y+n);
 	}
-
 	return 0;
 }
 
@@ -386,6 +433,7 @@ int32_t check_inputs(Runtime_Info* runtime)
 					break;
 			}
 		}
+
 	}
 
 	return 0;
