@@ -14,10 +14,11 @@ augroup remember_folds
 augroup END
 
 " start up a faux-IDE view
-execute("sp")
-execute("resize 10")
-execute("term")
-execute("NERDTreeToggle")
+edit "source/main.c"
+split
+resize 10
+term
+NERDTreeToggle
 
 let $src=prj_base.'/source'
 let $bin=prj_base.'/bin'
