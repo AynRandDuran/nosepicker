@@ -8,7 +8,8 @@ Adjust saturation in the big square with `H/L`, luminence with `J/K`. Or sat wit
 The hue spectrum slider adjusts with `N/B`.
 Holding either `shift` increases the adjust speed of any other input.
 If it wasn't already obvious, the bottom portion displays the active color in a big square along with RGB and HSL value, in decimal and hex.
-Now including mouse support -- click/drag around in the hue spectrum and L/S square to change values.
+Mouse support -- click/drag around in the hue spectrum and L/S square to change values.
+New -- Palette system. Recall a saved color from the bottom row (1-10, L->R), or overwrite the active palette selection with `return`.
 
 ## Configure and build
 ### Dependencies
