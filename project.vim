@@ -14,14 +14,10 @@ augroup remember_folds
 augroup END
 
 " start up a faux-IDE view
-command! Ide call s:ide()
-function! s:ide()
-	execute("sp")
-	execute("\<C-w\>J")
-	execute("resize 10")
-	execute("term")
-	execute("NERDTreeToggle")
-endfunction
+execute("sp")
+execute("resize 10")
+execute("term")
+execute("NERDTreeToggle")
 
 let $src=prj_base.'/source'
 let $bin=prj_base.'/bin'

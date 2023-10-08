@@ -21,8 +21,8 @@ Window_Layout config_layout = {
 // satisfying rel.[xy]*2 == .[wh] centers axis in parent container
 	.hsl_square.rel						=	(SDL_FRect){.x = 0.05, .y = 0.05, .w = 0.50, .h = 0.50},
 	.hue_slider.rel						=	(SDL_FRect){.x = 0.70, .y = 0.05, .w = 0.08, .h = 0.50},
-	.final_sample.rel					=	(SDL_FRect){.x = 0.05, .y = 0.65, .w = 0.20, .h = 0.20},
-	.info_container.rel				=	(SDL_FRect){.x = 0.05, .y = 0.65, .w = 0.90, .h = 0.30},
+	.final_sample.rel					=	(SDL_FRect){.x = 0.05, .y = 0.60, .w = 0.20, .h = 0.20},
+	.info_container.rel				=	(SDL_FRect){.x = 0.05, .y = 0.60, .w = 0.90, .h = 0.40},
 	.info_boxes.rel						=	(SDL_FRect){.x = 0.25, .y = 0.00, .w = 0.75, .h = 1.00},
 	.rgb_info.rel							=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 1.00, .h = 0.50},
 	.red_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00},
@@ -31,7 +31,8 @@ Window_Layout config_layout = {
 	.hsl_info.rel							=	(SDL_FRect){.x = 0.50, .y = 0.00, .w = 1.00, .h = 0.50},
 	.hue_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.00, .w = 0.30, .h = 1.00},
 	.sat_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.40, .w = 0.30, .h = 1.00},
-	.lum_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.80, .w = 0.30, .h = 1.00}
+	.lum_component.body.rel		=	(SDL_FRect){.x = 0.00, .y = 0.80, .w = 0.30, .h = 1.00},
+	.palette.rel							= (SDL_FRect){.x = 0.00, .y = 0.60, .w = 1.00, .h = 0.30}
 };
 
 #endif //__PICKER_CONFIG__

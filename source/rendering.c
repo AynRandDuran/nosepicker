@@ -15,6 +15,7 @@ SDL_Color green = {0, 255, 0, 255};
 SDL_Color blue = {0, 0, 255, 255};
 SDL_Color black = {0, 0, 0, 255};
 SDL_Color white = {255, 255, 255, 255};
+HSL_Color hsl_white = {0, 0, 100};
 SDL_Color magenta = {255, 0, 255, 255};
 
 sdl_group mgr;
@@ -35,6 +36,7 @@ int32_t refresh_layout(Runtime_Info* runtime)
 	render_container(&runtime->layout.window, &runtime->layout.info_container);
 	render_container(&runtime->layout.window, &runtime->layout.final_sample);
 	render_container(&runtime->layout.info_container.real, &runtime->layout.info_boxes);
+	render_container(&runtime->layout.info_container.real, &runtime->layout.palette);
 	render_container(&runtime->layout.info_boxes.real, &runtime->layout.rgb_info);
 	render_container(&runtime->layout.rgb_info.real, &runtime->layout.red_component.body);
 	render_container(&runtime->layout.rgb_info.real, &runtime->layout.green_component.body);
@@ -85,6 +87,11 @@ int32_t init_renderer(Runtime_Info* runtime)
 	init_text_container(&runtime->layout.hue_component, 64);
 	init_text_container(&runtime->layout.sat_component, 64);
 	init_text_container(&runtime->layout.lum_component, 64);
+
+	for (int p = 0; p < PALETTE_SIZE; p++)
+	{
+		runtime->layout.palette_color[p] = hsl_white;
+	}
 
 	refresh_layout(runtime);
 
@@ -152,8 +159,27 @@ int32_t mouse_click_in_container(Runtime_Info* runtime, SDL_FRect* container)
 	return 0;
 }
 
-// Rename this eventually
-// It's actually HSL
+int32_t render_palette(Runtime_Info* runtime, SDL_FRect* container)
+{
+	for (int p = 0; p < PALETTE_SIZE; p++)
+	{
+		SDL_Color item_color = hsl_to_rgb(runtime->layout.palette_color[p]);
+		SDL_FRect item = {
+			.x = container->x + (p * ((float)container->w / (float)PALETTE_SIZE)), .y = container->y,
+			.w = ((float)container->w / PALETTE_SIZE) * 0.90, .h = container->h};
+
+		SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(item_color));
+		if (p == runtime->active_palette)
+		{
+			SDL_SetRenderDrawColor(mgr.rend, unroll_sdl_color(item_color));
+			item.h *= 1.2;
+		}
+		SDL_RenderFillRectF(mgr.rend, &item);
+	}
+
+	return 0;
+}
+
 int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 {
 	NULL_CHECK(runtime);
@@ -354,6 +380,7 @@ int32_t render_layout(Runtime_Info* runtime, Window_Layout* layout)
 	render_vertical_hue_spectrum(runtime, &layout->hue_slider.real);
 	render_hsl_square(runtime, &layout->hsl_square.real);
 	render_info_boxes(runtime, &layout->info_boxes.real);
+	render_palette(runtime, &layout->palette.real);
 
 	return 0;
 }
@@ -422,6 +449,7 @@ int32_t check_inputs(Runtime_Info* runtime)
 		}
 		if (mgr.event.type == SDL_KEYUP)
 		{
+			int p = runtime->active_palette;
 			switch(mgr.event.key.keysym.sym)
 			{
 				case SDLK_q:
@@ -431,7 +459,36 @@ int32_t check_inputs(Runtime_Info* runtime)
 				case SDLK_LSHIFT:
 					move_speed = 1;
 					break;
+
+				case SDLK_0:
+				case SDLK_1:
+				case SDLK_2:
+				case SDLK_3:
+				case SDLK_4:
+				case SDLK_5:
+				case SDLK_6:
+				case SDLK_7:
+				case SDLK_8:
+				case SDLK_9:
+				{
+					int new_palette = mgr.event.key.keysym.sym - 48 - 1;
+					if (new_palette < 0)
+						new_palette = PALETTE_SIZE-1;
+
+					if (new_palette <= PALETTE_SIZE)
+					{
+						runtime->active_palette = new_palette;
+						runtime->active_hsl = runtime->layout.palette_color[new_palette];
+						runtime->active_rgb = hsl_to_rgb(runtime->active_hsl);
+					}
+				} break;
+
+				case SDLK_RETURN:
+				case SDLK_KP_ENTER:
+					runtime->layout.palette_color[p] = runtime->active_hsl;
+					break;
 			}
+
 		}
 
 	}

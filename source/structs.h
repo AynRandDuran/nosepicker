@@ -6,6 +6,8 @@
 #define Relative_Rect SDL_FRect
 #include <stdint.h>
 
+#define PALETTE_SIZE 10
+
 // A placeable rect, with relative components to its parent,
 // and its finalized real placement rectangle
 typedef struct
@@ -54,20 +56,23 @@ typedef struct
 {
 	// Tabbing these to visually indicate layout
 	SDL_FRect window;
-		Layout_Rect hsl_square; // big clicky draggy square
-		Layout_Rect hue_slider; // HSV slider bar
-		Layout_Rect info_container;
-			Layout_Rect final_sample; // small square showing full selected color
-			Layout_Rect info_boxes;
-				Layout_Rect rgb_info;
-					Text_Container red_component;
-					Text_Container green_component;
-					Text_Container blue_component;
-				Layout_Rect hsl_info;
-					Text_Container hue_component;
-					Text_Container sat_component;
-					Text_Container lum_component;
+	Layout_Rect hsl_square; // big clicky draggy square
+	Layout_Rect hue_slider; // HSV slider bar
+	Layout_Rect info_container;
+		Layout_Rect palette;
+		Layout_Rect final_sample; // small square showing full selected color
+		Layout_Rect info_boxes;
+			Layout_Rect rgb_info;
+				Text_Container red_component;
+				Text_Container green_component;
+				Text_Container blue_component;
+			Layout_Rect hsl_info;
+				Text_Container hue_component;
+				Text_Container sat_component;
+				Text_Container lum_component;
 
+	Layout_Rect palette_item[PALETTE_SIZE];
+	HSL_Color		palette_color[PALETTE_SIZE];
 } Window_Layout;
 
 typedef struct
@@ -84,6 +89,8 @@ typedef struct
 
 	SDL_Point mouse_click_pos;
 	int mouse_click;
+
+	int active_palette;
 
 } Runtime_Info;
 
