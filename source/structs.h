@@ -75,6 +75,13 @@ typedef struct
 	HSL_Color		palette_color[PALETTE_SIZE];
 } Window_Layout;
 
+typedef enum
+{
+	M_LEFT = SDL_BUTTON_LMASK,
+	M_RIGHT = SDL_BUTTON_RMASK,
+	M_COUNT
+} mouse_button;
+
 typedef struct
 {
 	SDL_Color active_rgb;
@@ -88,7 +95,7 @@ typedef struct
 	TTF_Font* font;
 
 	SDL_Point mouse_click_pos;
-	int mouse_click;
+	int mouse_click[M_COUNT];
 
 	int active_palette;
 

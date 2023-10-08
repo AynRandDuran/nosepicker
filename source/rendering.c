@@ -131,26 +131,30 @@ void grab_mouse_state(Runtime_Info* runtime)
 	buttons = SDL_GetMouseState(&runtime->mouse_click_pos.x, &runtime->mouse_click_pos.y);
 
 	if ((buttons & SDL_BUTTON_LMASK) != 0) {
-		runtime->mouse_click = 1;
+		runtime->mouse_click[M_LEFT] = 1;
+	}
+	if ((buttons & SDL_BUTTON_RMASK) != 0) {
+		runtime->mouse_click[M_RIGHT] = 1;
 	}
 }
 
 void clear_mouse_state(Runtime_Info* runtime)
 {
-	runtime->mouse_click = 0;
+	runtime->mouse_click[M_LEFT] = 0;
+	runtime->mouse_click[M_RIGHT] = 0;
 }
 
-int32_t is_mouse_down(Runtime_Info* runtime)
+int32_t is_mouse_down(Runtime_Info* runtime, mouse_button mb)
 {
 	grab_mouse_state(runtime);
-	int32_t down = runtime->mouse_click;
-	runtime->mouse_click = 0;
+	int32_t down = runtime->mouse_click[mb];
+	clear_mouse_state(runtime);
 	return down;
 }
 
-int32_t mouse_click_in_container(Runtime_Info* runtime, SDL_FRect* container)
+int32_t mouse_click_in_container(Runtime_Info* runtime, SDL_FRect* container, mouse_button mb)
 {
-	if (is_mouse_down(runtime) &&
+	if (is_mouse_down(runtime, mb) &&
 			runtime->mouse_click_pos.x >= container->x &&
 			runtime->mouse_click_pos.x <= container->x + container->w &&
 			runtime->mouse_click_pos.y >= container->y &&
@@ -175,6 +179,15 @@ int32_t render_palette(Runtime_Info* runtime, SDL_FRect* container)
 			item.h *= 1.2;
 		}
 		SDL_RenderFillRectF(mgr.rend, &item);
+
+		if (mouse_click_in_container(runtime, &item, M_LEFT))
+		{
+			runtime->active_palette = p;
+		}
+		if (mouse_click_in_container(runtime, &item, M_RIGHT))
+		{
+			runtime->layout.palette_color[p] = runtime->active_hsl;
+		}
 	}
 
 	return 0;
@@ -207,10 +220,16 @@ int32_t render_hsl_square(Runtime_Info* runtime, SDL_FRect* container)
 		}
 	}
 
-	if (mouse_click_in_container(runtime, container))
+	if (mouse_click_in_container(runtime, container, M_LEFT))
 	{
 		runtime->active_hsl.s = 100.0f * (runtime->mouse_click_pos.x - container->x) / container->w;
 		runtime->active_hsl.l = 100.0f * (1.0f - ((float)(runtime->mouse_click_pos.y - container->y) / container->h));
+	}
+	if (mouse_click_in_container(runtime, container, M_RIGHT))
+	{
+		runtime->active_hsl.s = 100.0f * (runtime->mouse_click_pos.x - container->x) / container->w;
+		runtime->active_hsl.l = 100.0f * (1.0f - ((float)(runtime->mouse_click_pos.y - container->y) / container->h));
+		runtime->layout.palette_color[runtime->active_palette] = runtime->active_hsl;
 	}
 
 	float s_norm = (float)runtime->active_hsl.s/100.0f;
@@ -334,9 +353,14 @@ int32_t render_vertical_hue_spectrum(Runtime_Info* runtime, SDL_FRect* container
 	NULL_CHECK(runtime);
 	NULL_CHECK(container);
 
-	if (mouse_click_in_container(runtime, container))
+	if (mouse_click_in_container(runtime, container, M_LEFT))
 	{
 		runtime->active_hsl.h = ((runtime->mouse_click_pos.y - container->y) / container->h) * 360;
+	}
+	if (mouse_click_in_container(runtime, container, M_RIGHT))
+	{
+		runtime->active_hsl.h = ((runtime->mouse_click_pos.y - container->y) / container->h) * 360;
+		runtime->layout.palette_color[runtime->active_palette] = runtime->active_hsl;
 	}
 
 	int bar_y = runtime->active_hsl.h/360.0f*container->h + container->y;
